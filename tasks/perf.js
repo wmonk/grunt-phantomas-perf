@@ -1,31 +1,30 @@
 'use strict';
 
+var Promise = require('bluebird');
 var phantomas = require('phantomas');
 var chalk = require('chalk');
 var _ = require('lodash');
 
 var errors = {
     253: 'Phantomas configuration is not correct.',
-    254: 'URL could not be loaded.',
+    254: 'Page could not be loaded.',
     255: 'Phantomas has failed with an unknown error.'
 };
 
-module.exports = function (grunt) {
-    grunt.registerMultiTask('perf', function () {
-        var done = this.async();
-        var options = _.assign({
-            phantomasOptions: {}
-        }, this.options());
+function testPage (args) {
+    var url = args[0], options = args[1], grunt = args[2];
+
+    return new Promise(function (res, rej) {
+        console.log('');
+        grunt.log.writeln('Analysing ' + chalk.bold(url));
+        console.log('');
+
         var assertFailed = false;
 
-        console.log('');
-        grunt.log.ok('Hitting ' + chalk.bold(options.url));
-        console.log('');
-
-        phantomas(options.url, options.phantomasOptions, function (err, json) {
+        phantomas(url, options.phantomasOptionsn, function (err, json) {
             if (err && err !== 252) {
                 grunt.fail.fatal(errors[err] || errors[255]);
-                return done(err);
+                return rej(err);
             }
 
             var metrics = json.metrics;
@@ -33,19 +32,51 @@ module.exports = function (grunt) {
             Object.keys(options.assertions).forEach(function (assertion) {
                 if (metrics[assertion] > options.assertions[assertion]) {
                     assertFailed = true;
-                    grunt.log.error(chalk.yellow(assertion) + ' failed', metrics[assertion], chalk.gray('>'), options.assertions[assertion]);
-                } else {
-                    grunt.log.ok(chalk.green(assertion) + ' passed');
+                    grunt.log.error(assertion + ' failed');
                     console.log('  ', chalk.gray('Wanted:'), options.assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
-                    console.log('');
+                } else {
+                    grunt.log.ok(assertion + ' passed');
+                    console.log('  ', chalk.gray('Wanted:'), options.assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
                 }
             });
 
-            if (assertFailed) {
-                grunt.fail.warn('Some of your assertions failed');
-            }
+            res(!assertFailed);
+        })
+        .progress(function (progress) {
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);
+            process.stdout.write('Loading page: ' + (progress * 100) + '%');
 
-            done();
+            if (progress === 1) {
+                process.stdout.write('\n\n');
+            }
         });
+    });
+}
+
+module.exports = function (grunt) {
+    grunt.registerMultiTask('perf', function () {
+        var done = this.async();
+        var options = _.assign({
+            urls: [],
+            phantomasOptions: {}
+        }, this.options());
+
+        if (typeof options.url === 'string') {
+            options.urls.push(options.url);
+        }
+
+        var generated = options.urls.map(function (url) {
+            return [url, options, grunt];
+        });
+
+        Promise.map(generated, testPage, { concurrency: 1 })
+            .then(function (data) {
+                if (data.length !== 0 && data.filter(function (x) { return x; }).length !== data.length) {
+                    return grunt.fail.fatal('Some assertions did not pass');
+                }
+
+                done();
+            });
     });
 };
