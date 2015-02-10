@@ -66,6 +66,10 @@ module.exports = function (grunt) {
             options.urls.push(options.url);
         }
 
+        if (options.urls.length === 0) {
+            return grunt.fail.fatal('You must specify at least one URL');
+        }
+
         var generated = options.urls.map(function (url) {
             if (_.isObject(url)) {
                 return [url.url, {
