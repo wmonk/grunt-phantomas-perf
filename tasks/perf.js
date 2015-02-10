@@ -67,6 +67,13 @@ module.exports = function (grunt) {
         }
 
         var generated = options.urls.map(function (url) {
+            if (_.isObject(url)) {
+                return [url.url, {
+                    phantomasOptions: options.phantomasOptions,
+                    assertions: url.assertions || options.assertions
+                }, grunt];
+            }
+
             return [url, options, grunt];
         });
 
