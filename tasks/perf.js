@@ -12,7 +12,7 @@ var errors = {
 };
 
 function olympic(values) {
-    var results = values;
+    var results = _.clone(values);
     var max, min;
 
     // Find and remove the maximum.
@@ -26,27 +26,29 @@ function olympic(values) {
     return results;
 }
 
-function createAverage(aggregate) {
-    var vals = (aggregate.length) || 1;
-    var average = {};
+function createAverage(assertions) {
+    return function (aggregate) {
+        var vals = (aggregate.length) || 1;
+        var average = {};
 
-    Object.keys(aggregate[0]).forEach(function (metric) {
-        average[metric] = [];
+        assertions.forEach(function (assertionKey) {
+            var assert = average[assertionKey] = {
+                raw: []
+            };
 
-        for (var i = 0; i < vals; i++) {
-            average[metric].push(aggregate[i][metric]);
-        }
+            for (var i = 0; i < vals; i++) {
+                assert.raw.push(aggregate[i][assertionKey]);
+            }
 
-        average[metric] = olympic(average[metric]);
+            var averaged = olympic(assert.raw).reduce(function (total, num) {
+                return total + num;
+            });
 
-        average[metric] = average[metric].reduce(function (total, num) {
-            return total + num;
+            assert.average = Math.round(averaged / (vals - 2));
         });
 
-        average[metric] = Math.round(average[metric] / (vals - 2));
-    });
-
-    return average;
+        return average;
+    };
 }
 
 function testPage(args) {
@@ -85,17 +87,19 @@ function testPage(args) {
                 });
             });
         }, { concurrency: 1 })
-            .then(createAverage)
+            .then(createAverage(Object.keys(assertions)))
             .then(function (metrics) {
                 console.log('\n');
                 Object.keys(assertions).forEach(function (assertion) {
-                    if (metrics[assertion] > assertions[assertion]) {
+                    if (metrics[assertion].average > assertions[assertion]) {
                         assertFailed = true;
                         grunt.log.error(assertion + ' failed');
-                        console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
+                        console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion].average);
+                        console.log('  ', chalk.gray('Raw results:'), metrics[assertion].raw.sort().join(', '));
                     } else {
                         grunt.log.ok(assertion + ' passed');
-                        console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
+                        console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion].average);
+                        console.log('  ', chalk.gray('Raw results:'), metrics[assertion].raw.sort().join(', '));
                     }
                 });
 
