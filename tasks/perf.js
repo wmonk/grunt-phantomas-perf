@@ -80,10 +80,11 @@ function testPage(args) {
 
                     res(json.metrics);
                 }).progress(function (progress) {
-                    var percent = Math.floor(((progress / trials) * 100) + ((100 / trials) * (trial - 1)));
+                    var percent = Math.floor(progress * 100);
+                    // var percent = Math.floor(((progress / trials) * 100) + ((100 / trials) * (trial - 1)));
                     process.stdout.clearLine();
                     process.stdout.cursorTo(0);
-                    process.stdout.write('Loading page: ' + percent + '%');
+                    process.stdout.write('Running trial (' + trial + '/' + trials + '): ' + percent + '%');
                 });
             });
         }, { concurrency: 1 })
@@ -95,11 +96,11 @@ function testPage(args) {
                         assertFailed = true;
                         grunt.log.error(assertion + ' failed');
                         console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion].average);
-                        console.log('  ', chalk.gray('Raw results:'), metrics[assertion].raw.sort().join(', '));
+                        console.log('  ', chalk.gray('Raw results:'), metrics[assertion].raw.join(', '));
                     } else {
                         grunt.log.ok(assertion + ' passed');
                         console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion].average);
-                        console.log('  ', chalk.gray('Raw results:'), metrics[assertion].raw.sort().join(', '));
+                        console.log('  ', chalk.gray('Raw results:'), metrics[assertion].raw.join(', '));
                     }
                 });
 
