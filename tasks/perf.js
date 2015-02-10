@@ -12,7 +12,7 @@ var errors = {
 };
 
 function testPage (args) {
-    var url = args[0], options = args[1], grunt = args[2];
+    var url = args[0], assertions = args[1].assertions, options = args[1].phantomasOptions, grunt = args[2];
 
     return new Promise(function (res, rej) {
         console.log('');
@@ -21,7 +21,7 @@ function testPage (args) {
 
         var assertFailed = false;
 
-        phantomas(url, options.phantomasOptionsn, function (err, json) {
+        phantomas(url, options, function (err, json) {
             if (err && err !== 252) {
                 grunt.fail.fatal(errors[err] || errors[255]);
                 return rej(err);
@@ -29,14 +29,14 @@ function testPage (args) {
 
             var metrics = json.metrics;
 
-            Object.keys(options.assertions).forEach(function (assertion) {
-                if (metrics[assertion] > options.assertions[assertion]) {
+            Object.keys(assertions).forEach(function (assertion) {
+                if (metrics[assertion] > assertions[assertion]) {
                     assertFailed = true;
                     grunt.log.error(assertion + ' failed');
-                    console.log('  ', chalk.gray('Wanted:'), options.assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
+                    console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
                 } else {
                     grunt.log.ok(assertion + ' passed');
-                    console.log('  ', chalk.gray('Wanted:'), options.assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
+                    console.log('  ', chalk.gray('Wanted:'), assertions[assertion], chalk.gray('Got:'), metrics[assertion]);
                 }
             });
 
