@@ -1,6 +1,6 @@
 {
   "name": "grunt-phantomas-perf",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A grunt plugin for asserting against phantomas metrics",
   "repository": "https://github.com/wmonk/grunt-phantomas-perf",
   "main": "tasks/phantomasPerf.js",
