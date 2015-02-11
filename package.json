@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^2.9.8",
     "chalk": "^0.5.1",
     "lodash": "^3.1.0",
     "phantomas": "^1.9.0"
