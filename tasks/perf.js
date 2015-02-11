@@ -3,10 +3,9 @@
 var Promise = require('bluebird');
 var _ = require('lodash');
 var extraAverageTests = 2;
-var testPage = require('../lib/testPage');
+var TestPage = require('../lib/testPage');
 
 module.exports = function (grunt) {
-
     grunt.registerMultiTask('perf', function () {
         var done = this.async();
         var options = _.assign({
@@ -25,17 +24,18 @@ module.exports = function (grunt) {
 
         var generated = options.urls.map(function (url) {
             if (_.isObject(url)) {
-                return testPage(url.url, options, (url.assertions || options.assertions));
+                return new TestPage(url.url, options, (url.assertions || options.assertions));
             }
 
-            return testPage(url, options, options.assertions);
+            return new TestPage(url, options, options.assertions);
         });
 
         Promise.all(generated)
             .then(function (data) {
                 var failedAssertions = data.filter(function (x) { return x; }).length;
                 if (failedAssertions !== 0) {
-                    return grunt.fail.fatal(failedAssertions, 'of your assertions passed');
+                    grunt.log.writeln('');
+                    return grunt.fail.fatal(failedAssertions +  'of your assertions failed');
                 }
 
                 done();
