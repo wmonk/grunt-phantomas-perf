@@ -6,7 +6,7 @@ var extraAverageTests = 2;
 var TestPage = require('../lib/testPage');
 
 module.exports = function (grunt) {
-    grunt.registerMultiTask('perf', function () {
+    grunt.registerMultiTask('phantomasPerf', function () {
         var done = this.async();
         var options = _.assign({
             urls: [],
