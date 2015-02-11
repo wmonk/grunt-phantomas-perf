@@ -24,7 +24,7 @@ In your project's Gruntfile, add a section named `phantomasPerf` to the data obj
 
 ```js
 grunt.initConfig({
-  juve: {
+  phantomasPerf: {
     my_site: {
       options: {
         url: 'http://google.com',
