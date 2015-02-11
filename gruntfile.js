@@ -4,6 +4,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     grunt.registerTask('lint', ['jscs', 'jshint']);
+    grunt.registerTask('default', ['lint', 'mochaTest']);
 
     grunt.initConfig({
         mochaTest: {
