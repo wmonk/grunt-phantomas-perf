@@ -4,6 +4,9 @@
   "description": "A grunt plugin for asserting against phantomas metrics",
   "repository": "https://github.com/wmonk/grunt-phantomas-perf",
   "main": "tasks/phantomasPerf.js",
+  "scripts": {
+    "test": "grunt"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
