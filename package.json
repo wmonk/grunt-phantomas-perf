@@ -1,11 +1,9 @@
 {
-  "name": "grunt-perf",
+  "name": "grunt-phantomas-perf",
   "version": "0.0.1",
-  "description": "",
-  "main": "perf.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "description": "A grunt plugin for asserting against phantomas metrics",
+  "repository": "https://github.com/wmonk/grunt-phantomas-perf",
+  "main": "tasks/perf.js",
   "author": "",
   "license": "ISC",
   "dependencies": {
