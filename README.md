@@ -27,7 +27,7 @@ grunt.initConfig({
   phantomasPerf: {
     my_site: {
       options: {
-        url: 'http://google.com',
+        urls: ['http://google.com'],
         trials: 5,
         timeout: 25,
         assertions: {
